@@ -11,10 +11,7 @@ import com.vasco.coderswag.Model.Category
 import com.vasco.coderswag.R
 
 
-class CategoryAdapter(ctx: Context, categories: List<Category>) : BaseAdapter() {
-
-    val ctx = ctx
-    val categories = categories
+class CategoryAdapter(val ctx: Context, val categories: List<Category>) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
