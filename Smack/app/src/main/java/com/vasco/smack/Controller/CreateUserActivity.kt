@@ -1,9 +1,11 @@
-package com.vasco.smack
+package com.vasco.smack.Controller
 
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.vasco.smack.R
+import com.vasco.smack.Services.AuthService
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -37,7 +39,7 @@ class CreateUserActivity : AppCompatActivity() {
 
         createAvatarImageView.setBackgroundColor(Color.rgb(r, g, b))
 
-        // Creates value equivalen to 255 but the the scale between 0 - 1
+        // Creates value equivalent to 255 but in the scale between 0 - 1
         val savedR = r.toDouble() / 255
         val savedG = r.toDouble() / 255
         val savedB = r.toDouble() / 255
@@ -47,6 +49,9 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClick(view: View) {
+        AuthService.registerUser(this, "vas@vas.com", "123456") { complete ->
+            if (complete) println("completed")
+        }
 
     }
 }
