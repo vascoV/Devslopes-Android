@@ -1,11 +1,15 @@
 package com.vasco.smack.Controller
 
+import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.view.View
+import android.widget.Toast
 import com.vasco.smack.R
 import com.vasco.smack.Services.AuthService
+import com.vasco.smack.Utilities.BROADCAST_USER_DATA_CHANGED
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -17,6 +21,8 @@ class CreateUserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_user)
+
+        createSpinner.visibility = View.GONE
     }
 
     fun generateUserAvatar(view: View) {
@@ -49,23 +55,54 @@ class CreateUserActivity : AppCompatActivity() {
     }
 
     fun createUserClick(view: View) {
+        enableSpinner(true)
         val userName = createUserNameTxt.text.toString()
         val email = createEmailTxt.text.toString()
         val password = createPasswordTxt.text.toString()
 
-        AuthService.registerUser(this, email, password) { registerSuccess ->
-            if (registerSuccess) {
-                AuthService.loginUser(this, email, password) { loginSuccess ->
-                    if (loginSuccess) {
-                       AuthService.createUser(this, userName, email, userAvatar, avatarColor) { createSuccess ->
-                           if (createSuccess) {
-                               finish()
-                           }
-                       }
+        if (userName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+
+            AuthService.registerUser(this, email, password) { registerSuccess ->
+                if (registerSuccess) {
+                    AuthService.loginUser(this, email, password) { loginSuccess ->
+                        if (loginSuccess) {
+                            AuthService.createUser(this, userName, email, userAvatar, avatarColor) { createSuccess ->
+                                if (createSuccess) {
+                                    val userDataChanged = Intent(BROADCAST_USER_DATA_CHANGED)
+                                    LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChanged)
+                                    enableSpinner(false)
+                                    finish()
+                                } else {
+                                    errorToast()
+                                }
+                            }
+                        } else {
+                            errorToast()
+                        }
                     }
+                } else {
+                    errorToast()
                 }
             }
+        } else {
+            Toast.makeText(this, "All the fields are required!", Toast.LENGTH_SHORT).show()
+            enableSpinner(false)
         }
+    }
 
+    fun errorToast() {
+        Toast.makeText(this, "Something went wromg please try again.", Toast.LENGTH_SHORT).show()
+        enableSpinner(false)
+    }
+
+    fun enableSpinner(enable: Boolean) {
+        if (enable) {
+            createSpinner.visibility = View.VISIBLE
+        } else {
+            createSpinner.visibility = View.GONE
+        }
+        createUserBtn.isEnabled = !enable
+        createAvatarImageView.isEnabled = !enable
+        bgColorBtn.isEnabled = !enable
     }
 }
