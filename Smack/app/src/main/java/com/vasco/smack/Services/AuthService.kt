@@ -1,14 +1,14 @@
 package com.vasco.smack.Services
 
 import android.content.Context
+import android.content.Intent
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.vasco.smack.Utilities.URL_CREATE_USER
-import com.vasco.smack.Utilities.URL_LOGIN
-import com.vasco.smack.Utilities.URL_REGISTER
+import com.vasco.smack.Utilities.*
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -74,7 +74,7 @@ object AuthService {
         }, Response.ErrorListener { error ->
 
             //this is where we are dealing with errors
-            Log.d("ERROR", "Could not register user: $error")
+            Log.d("ERROR", "Could not login user: $error")
             complete(false)
 
         }) {
@@ -138,5 +138,44 @@ object AuthService {
         }
 
         Volley.newRequestQueue(ctx).add(createRequest)
+    }
+
+    fun findUserByEmail(ctx: Context, complete: (Boolean) -> Unit) {
+
+        val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER$userEmail", null, Response.Listener {
+            try {
+                UserDataService.name = it.getString("name")
+                UserDataService.email = it.getString("email")
+                UserDataService.avatarName = it.getString("avatarName")
+                UserDataService.avatarColor = it.getString("avatarColor")
+                UserDataService.id = it.getString("_id")
+
+                val userDataChnaged = Intent(BROADCAST_USER_DATA_CHANGE)
+                LocalBroadcastManager.getInstance(ctx).sendBroadcast(userDataChnaged)
+                complete(true)
+
+            } catch (e: JSONException) {
+                Log.d("JSON", "EXC: ${e.localizedMessage}")
+            }
+
+        }, Response.ErrorListener { error ->
+            Log.d("ERROR", "Could not find user: $error")
+            complete(false)
+
+        }) {
+
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer $authToken")
+                return headers
+            }
+
+        }
+
+        Volley.newRequestQueue(ctx).add(findUserRequest)
     }
 }

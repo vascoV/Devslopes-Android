@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.Toast
 import com.vasco.smack.R
 import com.vasco.smack.Services.AuthService
-import com.vasco.smack.Utilities.BROADCAST_USER_DATA_CHANGED
+import com.vasco.smack.Utilities.BROADCAST_USER_DATA_CHANGE
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
@@ -68,7 +68,7 @@ class CreateUserActivity : AppCompatActivity() {
                         if (loginSuccess) {
                             AuthService.createUser(this, userName, email, userAvatar, avatarColor) { createSuccess ->
                                 if (createSuccess) {
-                                    val userDataChanged = Intent(BROADCAST_USER_DATA_CHANGED)
+                                    val userDataChanged = Intent(BROADCAST_USER_DATA_CHANGE)
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChanged)
                                     enableSpinner(false)
                                     finish()
